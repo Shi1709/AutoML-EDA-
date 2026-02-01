@@ -1,7 +1,9 @@
+import Dashboard from "./pages/Dashboard"
+
 const App = () => {
   return (
     <div>
-      AutoML-EDA
+      <Dashboard />
     </div>
   )
 }
