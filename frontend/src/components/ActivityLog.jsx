@@ -21,11 +21,7 @@ const ActivityLog = () => {
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
         {events.map((event, idx) => (
           <div key={idx} className="flex items-start gap-3">
-            <span
-              className="mt-0.5 inline-flex items-center justify-center
-                         w-4 h-4 rounded-full
-                         border border-gray-400
-                         text-[10px] font-semibold text-gray-500">
+            <span className="mt-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full border border-gray-400 text-[10px] font-semibold text-gray-500">
               i
             </span>
             <div>
@@ -34,7 +30,8 @@ const ActivityLog = () => {
                 <span className="text-xs text-gray-400">{event.time}</span>
                 <span
                   className="rounded bg-gray-100 px-2 py-0.5
-                             text-xs text-gray-500">
+                             text-xs text-gray-500"
+                >
                   {event.tag}
                 </span>
               </div>
