@@ -118,7 +118,7 @@ const UploadPreviewState = ({ file, onRemove }) => {
         </table>
       </div>
       <div className="flex justify-end">
-        <button className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        <button className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
           Continue to Data Cleaning
         </button>
       </div>
