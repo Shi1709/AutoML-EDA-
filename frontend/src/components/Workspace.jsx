@@ -1,5 +1,16 @@
 /* eslint-disable react/prop-types */
+import Correlation from "./Correlation";
+import DataCleaning from "./DataCleaning";
+import Encoding from "./Encoding";
 import UploadWorkspace from "./UploadWorkspace";
+import TargetSelection from "./TargetSelection";
+import ModelTraining from "./ModelTraining";
+import Comparison from "./Comparison";
+import PCA from "./PCA";
+import BestModel from "./BestModel";
+import Evaluation from "./Evaluation";
+import Visualization from "./Visualization";
+import Split from "./Split";
 
 const Workspace = ({ activeStep }) => {
   const renderStep = () => {
@@ -7,27 +18,27 @@ const Workspace = ({ activeStep }) => {
       case 1:
         return <UploadWorkspace />;
       case 2:
-        return <div className="p-6">Data Cleaning</div>;
+        return <DataCleaning />;
       case 3:
-        return <div className="p-6">Correlation</div>;
+        return <Correlation />;
       case 4:
-        return <div className="p-6">Encoding</div>;
+        return <Encoding />;
       case 5:
-        return <div className="p-6">Target Selection</div>;
+        return <TargetSelection />;
       case 6:
-        return <div className="p-6">Train/Test Split</div>;
+        return <Split />;
       case 7:
-        return <div className="p-6">Model Training</div>;
+        return <ModelTraining />;
       case 8:
-        return <div className="p-6">Compare Models</div>;
+        return <Comparison />;
       case 9:
-        return <div className="p-6">PCA</div>;
+        return <PCA />;
       case 10:
-        return <div className="p-6">Best Model</div>;
+        return <BestModel />;
       case 11:
-        return <div className="p-6">Evaluation</div>;
+        return <Evaluation />;
       case 12:
-        return <div className="p-6">Visualization</div>;
+        return <Visualization />;
       default:
         return null;
     }

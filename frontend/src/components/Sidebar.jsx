@@ -32,7 +32,7 @@ const steps = [
 
 const Sidebar = ({ activeStep, setActiveStep }) => {
   return (
-    <aside className="h-screen w-65 border-r border-gray-300 bg-white flex flex-col">
+    <aside className="h-full w-65 border-r border-gray-300 bg-white flex flex-col">
       <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-300">
         <div className="h-9 w-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
           <BrainCircuit size={20} />
@@ -62,7 +62,7 @@ const SidebarItem = ({ step, active, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`relative w-full flex items-start gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+      className={`cursor-pointer relative w-full flex items-start gap-3 px-3 py-3 rounded-lg text-left transition-all ${
         active ? "bg-blue-50 shadow-sm" : "hover:bg-gray-50"
       }`}
     >
