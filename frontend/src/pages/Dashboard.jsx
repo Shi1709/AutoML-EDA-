@@ -7,7 +7,7 @@ const Dashboard = () => {
   const [activeStep, setActiveStep] = useState(1);
 
   return (
-    <div className="grid grid-cols-[260px_1fr_320px] min-h-screen">
+    <div className="grid grid-cols-[260px_1fr_320px] h-full">
       <Sidebar activeStep={activeStep} setActiveStep={setActiveStep} />
       <Workspace activeStep={activeStep} />
       <ActivityLog />
