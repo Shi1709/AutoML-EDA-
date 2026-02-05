@@ -1,14 +1,6 @@
-# services/ingestion.py
 import pandas as pd
 
 def load_dataset(file_path: str):
-    """
-    SAFE CONVERSION:
-    - No input()
-    - No print()
-    - Same pandas readers
-    """
-
     if file_path.endswith(".csv"):
         df = pd.read_csv(file_path)
     elif file_path.endswith(".xlsx"):
@@ -25,6 +17,6 @@ def load_dataset(file_path: str):
         "meta": {
             "file_name": file_path,
             "rows": df.shape[0],
-            "columns": df.shape[1]
+            "columns": df.shape[1],
         }
     }

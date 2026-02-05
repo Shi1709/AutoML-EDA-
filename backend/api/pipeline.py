@@ -1,4 +1,3 @@
-# backend/api/pipeline.py
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import uuid
 import shutil
@@ -16,12 +15,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/upload")
 def upload_dataset(file: UploadFile = File(...)):
-    """
-    Step 1: Upload dataset and create pipeline
-    """
-
     pipeline_id = str(uuid.uuid4())
-
     file_path = os.path.join(UPLOAD_DIR, file.filename)
 
     with open(file_path, "wb") as buffer:
@@ -38,26 +32,20 @@ def upload_dataset(file: UploadFile = File(...)):
     return {
         "pipeline_id": pipeline_id,
         "preview": df.head(5).to_dict(orient="records"),
-        "columns": list(df.columns),
+        "columns": df.columns.tolist(),
         "meta": result["meta"]
     }
 
 
 @router.post("/clean")
 def clean_data(pipeline_id: str, strategy: str):
-    """
-    Step 2: Handle null values
-    strategy = 'drop' | 'fill'
-    """
-
     pipeline = get_pipeline(pipeline_id)
 
     result = handle_nulls(pipeline["df"], strategy)
-
     pipeline["df"] = result["df"]
     pipeline["step"] = 2
 
     return {
         "meta": result["meta"],
-        "columns": list(pipeline["df"].columns)
+        "columns": pipeline["df"].columns.tolist()
     }
