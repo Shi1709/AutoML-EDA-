@@ -1,4 +1,3 @@
-# core/pipeline_state.py
 PIPELINES = {}
 
 def create_pipeline(pipeline_id, df):

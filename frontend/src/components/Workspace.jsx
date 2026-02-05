@@ -12,15 +12,15 @@ import Evaluation from "./Evaluation";
 import Visualization from "./Visualization";
 import Split from "./Split";
 
-const Workspace = ({ activeStep }) => {
+const Workspace = ({ activeStep, goToStep }) => {
   const renderStep = () => {
     switch (activeStep) {
       case 1:
-        return <UploadWorkspace />;
+        return <UploadWorkspace goToStep={goToStep}/>;
       case 2:
-        return <DataCleaning />;
+        return <DataCleaning goToStep={goToStep}/>;
       case 3:
-        return <Correlation />;
+        return <Correlation goToStep={goToStep}/>;
       case 4:
         return <Encoding />;
       case 5:

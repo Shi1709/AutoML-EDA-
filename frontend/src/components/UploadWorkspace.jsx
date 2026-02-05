@@ -1,16 +1,29 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
+import axios from "axios";
 import UploadEmptyState from "./UploadEmptyState";
 import UploadPreviewState from "./UploadPreviewState";
 
-const UploadWorkspace = () => {
-  const [file, setFile] = useState(null);
+const UploadWorkspace = ({ goToStep }) => {
+  const [pipelineId, setPipelineId] = useState(null);
+  const [uploadData, setUploadData] = useState(null);
 
-  const handleUpload = (uploadedFile) => {
-    setFile(uploadedFile);
+  const handleUpload = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await axios.post(
+      "http://127.0.0.1:8000/pipeline/upload",
+      formData
+    );
+
+    setPipelineId(res.data.pipeline_id);
+    setUploadData(res.data);
   };
 
   const handleRemove = () => {
-    setFile(null);
+    setPipelineId(null);
+    setUploadData(null);
   };
 
   return (
@@ -18,10 +31,16 @@ const UploadWorkspace = () => {
       <div className="border-b border-gray-300 px-6 py-4">
         <h2 className="text-md font-semibold">Upload</h2>
       </div>
-      {!file ? (
+
+      {!uploadData ? (
         <UploadEmptyState onUpload={handleUpload} />
       ) : (
-        <UploadPreviewState file={file} onRemove={handleRemove} />
+        <UploadPreviewState
+          pipelineId={pipelineId}
+          data={uploadData}
+          onRemove={handleRemove}
+          goToStep={goToStep}
+        />
       )}
     </div>
   );
