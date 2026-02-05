@@ -4,28 +4,20 @@ import numpy as np
 def compute_correlation(df, threshold=0.85):
     corr_df = df.select_dtypes(include=np.number).corr()
 
-    high_corr = []
-    for i in corr_df.columns:
-        for j in corr_df.columns:
-            if i != j and corr_df.loc[i, j] > threshold:
-                if i not in high_corr:
-                    high_corr.append(i)
+    pairs = []
+    cols = corr_df.columns
+
+    for i in range(len(cols)):
+        for j in range(i + 1, len(cols)):
+            val = corr_df.iloc[i, j]
+            if abs(val) >= threshold:
+                pairs.append({
+                    "col1": cols[i],
+                    "col2": cols[j],
+                    "value": round(float(val), 3)
+                })
 
     return {
-        "correlation_matrix": corr_df,
-        "highly_correlated": high_corr
-    }
-
-
-def drop_column(df, column_name):
-    if column_name not in df.columns:
-        raise ValueError("Column not found")
-
-    df = df.drop(column_name, axis=1)
-
-    return {
-        "df": df,
-        "meta": {
-            "removed_column": column_name
-        }
+        "matrix": corr_df.round(2).to_dict(),
+        "pairs": pairs
     }
