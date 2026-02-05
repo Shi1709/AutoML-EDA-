@@ -12,15 +12,22 @@ import Evaluation from "./Evaluation";
 import Visualization from "./Visualization";
 import Split from "./Split";
 
-const Workspace = ({ activeStep, goToStep }) => {
+const Workspace = ({ activeStep, goToStep, pipelineId, setPipelineId, uploadData, setUploadData }) => {
   const renderStep = () => {
     switch (activeStep) {
       case 1:
-        return <UploadWorkspace goToStep={goToStep}/>;
+        return (
+          <UploadWorkspace
+            goToStep={goToStep}
+            setPipelineId={setPipelineId}
+            uploadData={uploadData}
+            setUploadData={setUploadData}
+          />
+        );
       case 2:
-        return <DataCleaning goToStep={goToStep}/>;
+        return <DataCleaning goToStep={goToStep} pipelineId={pipelineId} />;
       case 3:
-        return <Correlation goToStep={goToStep}/>;
+        return <Correlation goToStep={goToStep} pipelineId={pipelineId} />;
       case 4:
         return <Encoding />;
       case 5:
@@ -45,9 +52,7 @@ const Workspace = ({ activeStep, goToStep }) => {
   };
 
   return (
-    <main className="flex-1 overflow-y-auto bg-gray-50">
-      {renderStep()}
-    </main>
+    <main className="flex-1 overflow-y-auto bg-gray-50">{renderStep()}</main>
   );
 };
 

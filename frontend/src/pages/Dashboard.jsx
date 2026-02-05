@@ -6,10 +6,12 @@ import Workspace from "../components/Workspace";
 const Dashboard = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [pipelineId, setPipelineId] = useState(null);
+  const [uploadData, setUploadData] = useState(null);
 
   const goToStep = (nextStep) => {
     setCompletedSteps((prev) =>
-      prev.includes(activeStep) ? prev : [...prev, activeStep]
+      prev.includes(activeStep) ? prev : [...prev, activeStep],
     );
     setActiveStep(nextStep);
   };
@@ -21,7 +23,16 @@ const Dashboard = () => {
         completedSteps={completedSteps}
         setActiveStep={setActiveStep}
       />
-      <Workspace activeStep={activeStep} goToStep={goToStep} />
+
+      <Workspace
+        activeStep={activeStep}
+        goToStep={goToStep}
+        pipelineId={pipelineId}
+        setPipelineId={setPipelineId}
+        uploadData={uploadData}
+        setUploadData={setUploadData}
+      />
+
       <ActivityLog />
     </div>
   );
