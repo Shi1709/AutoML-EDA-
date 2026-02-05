@@ -9,7 +9,7 @@ from core.pipeline_state import create_pipeline, get_pipeline
 
 router = APIRouter()
 
-UPLOAD_DIR = "backend/storage/datasets"
+UPLOAD_DIR = "storage/datasets"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
