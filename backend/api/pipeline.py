@@ -6,6 +6,7 @@ import os
 from services.ingestion import load_dataset
 from services.cleaning import handle_nulls
 from core.pipeline_state import create_pipeline, get_pipeline
+from services.correlation import compute_correlation
 
 router = APIRouter()
 
@@ -49,3 +50,13 @@ def clean_data(pipeline_id: str, strategy: str):
         "meta": result["meta"],
         "columns": pipeline["df"].columns.tolist()
     }
+
+@router.get("/correlation")
+def get_correlation(pipeline_id: str, threshold: float = 0.9):
+    pipeline = get_pipeline(pipeline_id)
+
+    result = compute_correlation(pipeline["df"], threshold)
+
+    pipeline["step"] = 3
+
+    return result
