@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// import axios from "axios";
 import UploadEmptyState from "./UploadEmptyState";
 import UploadPreviewState from "./UploadPreviewState";
 

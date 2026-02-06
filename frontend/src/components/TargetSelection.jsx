@@ -31,8 +31,7 @@ const TargetSelection = ({ pipelineId, goToStep }) => {
 
       const data = await res.json();
       setMeta(data.meta);
-
-      goToStep(6); // Train/Test Split
+      goToStep(6); 
     } catch (err) {
       console.error(err);
       alert("Target selection failed");
@@ -44,7 +43,6 @@ const TargetSelection = ({ pipelineId, goToStep }) => {
       <div className="border-b border-gray-300 px-6 py-4">
         <h2 className="text-md font-semibold">Target</h2>
       </div>
-
       <div className="flex-1 p-6 space-y-6">
         <div>
           <h3 className="text-xl font-semibold mb-1">Target Selection</h3>
@@ -53,7 +51,6 @@ const TargetSelection = ({ pipelineId, goToStep }) => {
             automatically detected.
           </p>
         </div>
-
         <div className="rounded-lg border border-gray-200 bg-white px-5 py-4 space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
             <input
@@ -63,7 +60,6 @@ const TargetSelection = ({ pipelineId, goToStep }) => {
             />
             Select Target Column
           </div>
-
           <div className="relative">
             <button
               onClick={() => setOpen((o) => !o)}

@@ -21,8 +21,6 @@ const PCA = ({ pipelineId, goToStep }) => {
 
       const data = await res.json();
       setPcaMeta(data.meta);
-
-      // goToStep(10);
     } catch (err) {
       console.error(err);
       alert("PCA failed");
@@ -71,13 +69,11 @@ const PCA = ({ pipelineId, goToStep }) => {
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 after:absolute after:top-0.5 after:left-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5" />
           </label>
         </div>
-
         {!enabled && (
           <div className="border border-gray-300 rounded-lg p-4 text-center text-gray-500">
             PCA is disabled. The model will use all features.
           </div>
         )}
-
         {enabled && (
           <>
             <div className="border border-gray-300 rounded-lg p-4 space-y-2">
@@ -85,7 +81,6 @@ const PCA = ({ pipelineId, goToStep }) => {
                 <p className="font-medium">Variance to Retain</p>
                 <p className="font-semibold text-blue-600">{variance}%</p>
               </div>
-
               <input
                 type="range"
                 min="70"
@@ -95,10 +90,8 @@ const PCA = ({ pipelineId, goToStep }) => {
                 className="w-full accent-blue-600"
               />
             </div>
-
             <div className="border border-gray-300 rounded-lg p-4">
               <p className="font-medium mb-4">Dimension Reduction Preview</p>
-
               <div className="flex items-center justify-between">
                 <div className="flex-1 text-center bg-gray-50 rounded-lg py-6">
                   <p className="text-sm text-gray-500">Original Dimensions</p>
@@ -121,7 +114,6 @@ const PCA = ({ pipelineId, goToStep }) => {
             </div>
           </>
         )}
-
         <div className="flex justify-end">
           <button
             onClick={applyPCA}
@@ -130,7 +122,6 @@ const PCA = ({ pipelineId, goToStep }) => {
           >
             Apply PCA
           </button>
-
           {pcaMeta && (
             <button
               onClick={() => goToStep(10)}

@@ -47,7 +47,7 @@ const Correlation = ({ pipelineId, goToStep }) => {
       },
     );
 
-    goToStep(4); // Encoding
+    goToStep(4); 
   };
 
   return (
@@ -64,8 +64,6 @@ const Correlation = ({ pipelineId, goToStep }) => {
             multicollinearity
           </p>
         </div>
-
-        {/* MATRIX — unchanged */}
         <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
           <div className="px-5 py-4 border-b text-sm font-semibold text-gray-900">
             Correlation Matrix (Preview)
@@ -106,8 +104,6 @@ const Correlation = ({ pipelineId, goToStep }) => {
             </table>
           </div>
         </div>
-
-        {/* Threshold — unchanged */}
         <div className="rounded-lg border bg-white px-5 py-4">
           <div className="flex justify-between mb-3">
             <p className="text-sm font-semibold">Correlation Threshold</p>
@@ -125,8 +121,6 @@ const Correlation = ({ pipelineId, goToStep }) => {
             className="w-full accent-blue-600"
           />
         </div>
-
-        {/* PAIRS — wired */}
         <div className="rounded-lg border bg-white overflow-hidden">
           <div className="px-5 py-4 border-b flex justify-between">
             <p className="text-sm font-semibold">Highly Correlated Pairs</p>
@@ -134,7 +128,6 @@ const Correlation = ({ pipelineId, goToStep }) => {
               {pairs.length} pairs found
             </span>
           </div>
-
           <div className="divide-y">
             {pairs.map((p, i) => (
               <label
@@ -158,7 +151,6 @@ const Correlation = ({ pipelineId, goToStep }) => {
             ))}
           </div>
         </div>
-
         <div className="flex justify-end">
           <button
             onClick={handleDropAndContinue}

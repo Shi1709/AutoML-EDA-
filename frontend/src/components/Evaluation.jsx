@@ -53,8 +53,6 @@ const Evaluation = ({ pipelineId, goToStep }) => {
             Detailed performance metrics for <b>{model}</b>
           </p>
         </div>
-
-        {/* REGRESSION */}
         {task_type === "REGRESSION" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <MetricCard title="R² Score" value={metrics.r2} />
@@ -63,7 +61,6 @@ const Evaluation = ({ pipelineId, goToStep }) => {
           </div>
         )}
 
-        {/* CLASSIFICATION */}
         {task_type === "CLASSIFICATION" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <MetricCard title="Accuracy" value={metrics.accuracy} />

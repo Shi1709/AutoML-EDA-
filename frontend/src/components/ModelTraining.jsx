@@ -22,8 +22,6 @@ const ModelTraining = ({ pipelineId, goToStep }) => {
 
     setScores(data.meta.metrics);
     setModelList(models);
-
-    // simulate progress AFTER data exists
     setProgress(0);
 
     let i = 0;
@@ -33,7 +31,7 @@ const ModelTraining = ({ pipelineId, goToStep }) => {
 
       if (i >= models.length) {
         clearInterval(interval);
-        setStage("completed"); // ✅ ONLY here
+        setStage("completed"); 
       }
     }, 800);
   };
@@ -51,7 +49,6 @@ const ModelTraining = ({ pipelineId, goToStep }) => {
             Train multiple machine learning models and compare their performance
           </p>
         </div>
-
         {stage === "ready" && (
           <div className="rounded-lg border bg-white px-6 py-10 text-center space-y-4">
             <Play className="mx-auto h-10 w-10 text-blue-600" />
@@ -66,7 +63,6 @@ const ModelTraining = ({ pipelineId, goToStep }) => {
             </button>
           </div>
         )}
-
         {stage !== "ready" && (
           <div className="rounded-lg border bg-white overflow-hidden">
             <div className="px-5 py-4 border-b flex justify-between">
@@ -84,7 +80,6 @@ const ModelTraining = ({ pipelineId, goToStep }) => {
                 </div>
               )}
             </div>
-
             <div className="divide-y">
               {modelList.map((model, index) => {
                 const done = index < progress;
@@ -102,7 +97,6 @@ const ModelTraining = ({ pipelineId, goToStep }) => {
                         </span>
                       )}
                     </div>
-
                     <div className="h-2 bg-gray-100 rounded-full">
                       <div
                         className="h-full bg-blue-600 transition-all"

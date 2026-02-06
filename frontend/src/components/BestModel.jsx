@@ -4,7 +4,7 @@ import { Trophy, Loader2 } from "lucide-react";
 
 const BestModel = ({ pipelineId, goToStep }) => {
   const [models, setModels] = useState([]);
-  const [bestModel, setBestModel] = useState(null); // string
+  const [bestModel, setBestModel] = useState(null); 
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -15,8 +15,8 @@ const BestModel = ({ pipelineId, goToStep }) => {
     fetch(`http://127.0.0.1:8000/pipeline/compare?pipeline_id=${pipelineId}`)
       .then((res) => res.json())
       .then((data) => {
-        setModels(data.ranking);      // ✅ correct
-        setBestModel(data.best_model); // ✅ string
+        setModels(data.ranking);      
+        setBestModel(data.best_model); 
         setLoading(false);
       })
       .catch((err) => {
@@ -63,7 +63,6 @@ const BestModel = ({ pipelineId, goToStep }) => {
       </div>
 
       <div className="flex-1 p-6 space-y-6">
-        {/* Recommended */}
         <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-md bg-blue-100 flex items-center justify-center">
@@ -81,8 +80,6 @@ const BestModel = ({ pipelineId, goToStep }) => {
             <p className="text-xs text-gray-500">Avg Score</p>
           </div>
         </div>
-
-        {/* Model list */}
         <div className="space-y-3">
           {models.map((m, idx) => (
             <div

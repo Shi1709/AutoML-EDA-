@@ -1,6 +1,4 @@
 import { useState } from "react";
-// import axios from "axios";
-// import { TriangleAlert } from "lucide-react";
 
 /* eslint-disable react/prop-types */
 const DataCleaning = ({ pipelineId, goToStep }) => {
@@ -21,7 +19,7 @@ const DataCleaning = ({ pipelineId, goToStep }) => {
       const data = await res.json();
       setResult(data);
 
-      goToStep(3); // Correlation
+      goToStep(3); 
     } catch (err) {
       console.error(err);
       alert("Cleaning failed");
