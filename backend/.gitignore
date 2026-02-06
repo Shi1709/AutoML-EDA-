@@ -11,15 +11,16 @@ venv/
 .vscode/
 .idea/
 
-backend/storage/datasets/*
-backend/storage/models/*
-backend/storage/plots/*
+storage/datasets/*
+storage/models/*
+storage/plots/*
 
-!backend/storage/datasets/.gitkeep
-!backend/storage/models/.gitkeep
-!backend/storage/plots/.gitkeep
+!storage/datasets/.gitkeep
+!storage/models/.gitkeep
+!storage/plots/.gitkeep
 
 *.log
 *.pdf
 
 .env
+catboost_info/

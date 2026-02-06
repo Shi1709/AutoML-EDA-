@@ -5,12 +5,13 @@ const Correlation = ({ pipelineId, goToStep }) => {
   const [threshold, setThreshold] = useState(0.9);
   const [matrix, setMatrix] = useState(null);
   const [pairs, setPairs] = useState([]);
+  const [selectedCols, setSelectedCols] = useState([]);
 
   useEffect(() => {
     if (!pipelineId) return;
 
     fetch(
-      `http://127.0.0.1:8000/pipeline/correlation?pipeline_id=${pipelineId}&threshold=${threshold}`
+      `http://127.0.0.1:8000/pipeline/correlation?pipeline_id=${pipelineId}&threshold=${threshold}`,
     )
       .then((res) => res.json())
       .then((data) => {
@@ -23,10 +24,31 @@ const Correlation = ({ pipelineId, goToStep }) => {
   if (!matrix) return null;
 
   const headers = Object.keys(matrix);
-  const rows = headers.map((row) => [
-    row,
-    headers.map((col) => matrix[row][col]),
-  ]);
+  const rows = headers.map((r) => [r, headers.map((c) => matrix[r][c])]);
+
+  const toggleColumn = (col) => {
+    setSelectedCols((prev) =>
+      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col],
+    );
+  };
+
+  const handleDropAndContinue = async () => {
+    if (selectedCols.length === 0) {
+      goToStep(4);
+      return;
+    }
+
+    await fetch(
+      `http://127.0.0.1:8000/pipeline/drop-columns?pipeline_id=${pipelineId}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ columns: selectedCols }),
+      },
+    );
+
+    goToStep(4); // Encoding
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -43,52 +65,36 @@ const Correlation = ({ pipelineId, goToStep }) => {
           </p>
         </div>
 
-        {/* Correlation Matrix */}
+        {/* MATRIX — unchanged */}
         <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
           <div className="px-5 py-4 border-b text-sm font-semibold text-gray-900">
             Correlation Matrix (Preview)
           </div>
-
           <div className="p-5 overflow-x-auto">
             <table className="border-separate border-spacing-2 text-sm">
               <thead>
                 <tr>
                   <th />
                   {headers.map((h) => (
-                    <th
-                      key={h}
-                      className="max-w-22.5 truncate px-2 text-gray-500 font-medium"
-                      title={h}
-                    >
+                    <th key={h} className="px-2 text-gray-500 font-medium">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-
               <tbody>
-                {rows.map(([rowLabel, values]) => (
-                  <tr key={rowLabel}>
-                    <td
-                      className="max-w-30 truncate pr-2 text-gray-600"
-                      title={rowLabel}
-                    >
-                      {rowLabel}
-                    </td>
-
-                    {values.map((v, i) => (
+                {rows.map(([r, vals]) => (
+                  <tr key={r}>
+                    <td className="pr-2 text-gray-600">{r}</td>
+                    {vals.map((v, i) => (
                       <td
                         key={i}
                         className={`px-3 py-2 rounded-md text-center font-medium ${
                           v > 0.8
                             ? "bg-blue-500 text-white"
-                            : v > 0.3
-                            ? "bg-blue-100 text-blue-700"
                             : v < -0.8
-                            ? "bg-red-400 text-white"
-                            : v < -0.3
-                            ? "bg-red-100 text-red-600"
-                            : "bg-gray-100 text-gray-700"
+                              ? "bg-red-400 text-white"
+                              : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         {v.toFixed(2)}
@@ -98,84 +104,54 @@ const Correlation = ({ pipelineId, goToStep }) => {
                 ))}
               </tbody>
             </table>
-
-            <div className="flex gap-4 mt-4 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <span className="h-3 w-3 rounded bg-blue-500" /> High positive
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-3 w-3 rounded bg-blue-100" /> Low positive
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-3 w-3 rounded bg-red-400" /> High negative
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-3 w-3 rounded bg-red-100" /> Low negative
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* Threshold */}
-        <div className="rounded-lg border border-gray-200 bg-white px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-gray-900">
-              Correlation Threshold
-            </p>
-            <span className="text-sm font-medium text-blue-600">
+        {/* Threshold — unchanged */}
+        <div className="rounded-lg border bg-white px-5 py-4">
+          <div className="flex justify-between mb-3">
+            <p className="text-sm font-semibold">Correlation Threshold</p>
+            <span className="text-sm text-blue-600">
               {threshold.toFixed(2)}
             </span>
           </div>
-
           <input
             type="range"
             min="0.5"
             max="1"
             step="0.01"
             value={threshold}
-            onChange={(e) => setThreshold(Number(e.target.value))}
+            onChange={(e) => setThreshold(+e.target.value)}
             className="w-full accent-blue-600"
           />
-
-          <p className="text-sm text-gray-500 mt-2">
-            Features with correlation above this threshold will be flagged
-          </p>
         </div>
 
-        {/* Highly Correlated Pairs */}
-        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-          <div className="px-5 py-4 border-b flex items-center justify-between">
-            <p className="text-sm font-semibold text-gray-900">
-              Highly Correlated Pairs
-            </p>
+        {/* PAIRS — wired */}
+        <div className="rounded-lg border bg-white overflow-hidden">
+          <div className="px-5 py-4 border-b flex justify-between">
+            <p className="text-sm font-semibold">Highly Correlated Pairs</p>
             <span className="text-sm text-gray-500">
               {pairs.length} pairs found
             </span>
           </div>
 
           <div className="divide-y">
-            {pairs.map((p, idx) => (
+            {pairs.map((p, i) => (
               <label
-                key={idx}
+                key={i}
                 className="flex items-center justify-between px-5 py-4 text-sm"
               >
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     className="h-4 w-4 accent-blue-600"
+                    onChange={() => toggleColumn(p.col2)}
                   />
-                  <span className="truncate max-w-60">
+                  <span>
                     {p.col1} ↔ {p.col2}
                   </span>
                 </div>
-
-                <span
-                  className={`rounded px-2 py-1 font-medium ${
-                    p.value > 0
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-red-100 text-red-600"
-                  }`}
-                >
+                <span className="rounded px-2 py-1 text-sm bg-gray-100">
                   {p.value}
                 </span>
               </label>
@@ -185,8 +161,8 @@ const Correlation = ({ pipelineId, goToStep }) => {
 
         <div className="flex justify-end">
           <button
-            onClick={() => goToStep(4)}
-            className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            onClick={handleDropAndContinue}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
           >
             Continue to Encoding
           </button>

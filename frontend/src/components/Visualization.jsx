@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -7,240 +6,166 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
   LineChart,
   Line,
 } from "recharts";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-const r2Data = [
-  { name: "Linear", value: 0.706 },
-  { name: "Ridge", value: 0.781 },
-  { name: "Random", value: 0.726 },
-  { name: "Gradient", value: 0.887 },
-  { name: "Support", value: 0.832 },
-  { name: "Neural", value: 0.843 },
-];
+/* eslint-disable react/prop-types */
 
-const trainingTimeData = [
-  { name: "Linear", time: 3.6 },
-  { name: "Ridge", time: 2.9 },
-  { name: "Random", time: 4.3 },
-  { name: "Gradient", time: 2.6 },
-  { name: "Support", time: 4.87 },
-  { name: "Neural", time: 3.6 },
-];
-
-const featureData = [
-  { name: "Id", value: 1.007 },
-  { name: "MSSubClass", value: 0.95 },
-  { name: "LotFrontage", value: 0.78 },
-  { name: "LotArea", value: 0.68 },
-  { name: "Street", value: 0.57 },
-  { name: "Neighborhood", value: 0.42 },
-  { name: "OverallQual", value: 0.36 },
-  { name: "YearBuilt", value: 0.18 },
-];
-
-const pieTrain = [
-  { name: "Correct", value: 85, fill: "#2563EB" },
-  { name: "Incorrect", value: 15, fill: "#22C55E" },
-];
-
-const pieTest = [
-  { name: "Correct", value: 78, fill: "#2563EB" },
-  { name: "Incorrect", value: 22, fill: "#22C55E" },
-];
-
-const fadeUp = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -12 },
-  transition: { duration: 0.25, ease: "easeOut" },
-};
-
-const renderPieLabel = ({ name, percent }) =>
-  `${name}: ${(percent * 100).toFixed(0)}%`;
-
-const Visualization = () => {
-  const [tab, setTab] = useState("performance");
+const Visualization = ({ pipelineId }) => {
+  const [data, setData] = useState(null);
   const exportRef = useRef(null);
 
+  useEffect(() => {
+    if (!pipelineId) return;
+
+    fetch(
+      `http://127.0.0.1:8000/pipeline/visualization?pipeline_id=${pipelineId}`,
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        console.log("Visualization API response:", res);
+        setData(res);
+      })
+      .catch(console.error);
+  }, [pipelineId]);
+
   const exportPDF = async () => {
-    await new Promise((r) => setTimeout(r, 400));
-    const canvas = await html2canvas(exportRef.current, { scale: 2 });
+    await new Promise((r) => setTimeout(r, 300));
+
+    const canvas = await html2canvas(exportRef.current, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      useCORS: true,
+      onclone: (doc) => {
+        doc.querySelectorAll("*").forEach((el) => {
+          const style = window.getComputedStyle(el);
+
+          if (style.color.includes("oklch")) {
+            el.style.color = "rgb(0,0,0)";
+          }
+
+          if (style.backgroundColor.includes("oklch")) {
+            el.style.backgroundColor = "rgb(255,255,255)";
+          }
+
+          if (style.borderColor.includes("oklch")) {
+            el.style.borderColor = "rgb(220,220,220)";
+          }
+        });
+      },
+    });
+
     const img = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
+
     const w = pdf.internal.pageSize.getWidth();
     const h = (canvas.height * w) / canvas.width;
+
     pdf.addImage(img, "PNG", 0, 0, w, h);
-    pdf.save("model-visualization.pdf");
+    pdf.save("model-performance.pdf");
   };
+
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        Loading visualization…
+      </div>
+    );
+  }
+
+  const scoreData = data.model_scores || [];
+  const timeData = data.training_time || [];
+  const memoryData = data.memory_usage || [];
+
+  if (scoreData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        No visualization data available
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
       <div className="border-b border-gray-300 bg-white px-6 py-4">
         <h2 className="text-md font-semibold">Visualization</h2>
       </div>
-      <div ref={exportRef} className="flex-1 p-6 space-y-8">
+      <div ref={exportRef} className="flex-1 p-8 space-y-14 bg-white">
         <div>
           <h3 className="text-2xl font-semibold text-gray-900">
-            Model Visualization
+            Model Performance Summary
           </h3>
           <p className="text-sm text-gray-500">
-            Visual analysis of model performance and feature importance
+            Average metrics across 3 training runs
           </p>
         </div>
-        <div className="inline-flex bg-white rounded-xl p-1 shadow-sm border border-gray-300">
-          {[
-            ["performance", "Model Performance"],
-            ["importance", "Feature Importance"],
-            ["distribution", "Prediction Distribution"],
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`px-5 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
-                tab === key
-                  ? "bg-blue-600 text-white shadow"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="rounded-xl border border-gray-300 p-8">
+          <h4 className="font-semibold mb-4">Model Score Comparison</h4>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={scoreData} layout="vertical">
+              <XAxis type="number" domain={[0, 1]} />
+              <YAxis dataKey="name" type="category" />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid #e5e7eb",
+                }}
+              />
+
+              <Bar dataKey="value" fill="#2563EB" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        <AnimatePresence mode="wait">
-          {tab === "performance" && (
-            <motion.div {...fadeUp} className="space-y-6">
-              <div className="rounded-2xl border border-gray-300 bg-white p-6 shadow-sm h-85">
-                <h4 className="font-semibold mb-4">R² Score Comparison</h4>
-                <ResponsiveContainer width="100%" height="95%">
-                  <BarChart
-                    data={r2Data}
-                    layout="vertical"
-                    margin={{ top: 10, right: 20, left: 30, bottom: 10 }}
-                  >
-                    <XAxis type="number" domain={[0, 1]} />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      tickMargin={10}
-                    />
-                    <Tooltip />
-                    <Bar
-                      dataKey="value"
-                      fill="#2563EB"
-                      radius={[0, 8, 8, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="rounded-2xl border border-gray-300 bg-white p-6 shadow-sm h-80">
-                <h4 className="font-semibold mb-4">
-                  Training Time (seconds)
-                </h4>
-                <ResponsiveContainer width="100%" height="95%">
-                  <LineChart
-                    data={trainingTimeData}
-                    margin={{ top: 10, right: 20, left: 30, bottom: 10 }}
-                  >
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 8]} />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="time"
-                      stroke="#22C55E"
-                      strokeWidth={3}
-                      dot={{ r: 5 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          )}
-          {tab === "importance" && (
-            <motion.div
-              {...fadeUp}
-              className="rounded-2xl border border-gray-300 bg-white p-6 shadow-sm h-100"
-            >
-              <h4 className="font-semibold mb-4">
-                Feature Importance (Gradient Boosting)
-              </h4>
-              <ResponsiveContainer width="100%" height="95%">
-                <BarChart
-                  data={featureData}
-                  layout="vertical"
-                  margin={{ top: 10, right: 20, left: 70, bottom: 10 }}
-                >
-                  <XAxis type="number" />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    tickMargin={10}
-                  />
-                  <Tooltip />
-                  <Bar
-                    dataKey="value"
-                    fill="#F59E0B"
-                    radius={[0, 8, 8, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
-          {tab === "distribution" && (
-            <motion.div
-              {...fadeUp}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            >
-              {[["Train Set", pieTrain], ["Test Set", pieTest]].map(
-                ([title, data]) => (
-                  <div
-                    key={title}
-                    className="rounded-2xl border border-gray-300 bg-white p-6 shadow-sm h-85"
-                  >
-                    <h4 className="font-semibold mb-4">{title}</h4>
-                    <ResponsiveContainer width="100%" height="95%">
-                      <PieChart>
-                        <Pie
-                          data={data}
-                          dataKey="value"
-                          innerRadius={70}
-                          outerRadius={100}
-                          paddingAngle={4}
-                          label={renderPieLabel}
-                          labelLine
-                        />
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                )
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <div className="rounded-2xl border border-gray-300 bg-white p-6 shadow-sm flex items-center justify-between">
-          <p className="font-semibold">Export Options</p>
-          <div className="flex gap-3">
-            <button className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
-              Export Model (.pkl)
-            </button>
-            <button
-              onClick={exportPDF}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
-            >
-              Download PDF
-            </button>
-            <button className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
-              Export CSV
-            </button>
-          </div>
+        <div className="rounded-xl border border-gray-300 p-8">
+          <h4 className="font-semibold mb-4">Avg Training Time (seconds)</h4>
+          <ResponsiveContainer width="100%" height={340}>
+            <LineChart data={timeData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid #e5e7eb",
+                }}
+              />
+
+              <Line
+                type="monotone"
+                dataKey="time"
+                stroke="#16A34A"
+                strokeWidth={3}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
+        <div className="rounded-xl border border-gray-300 p-6">
+          <h4 className="font-semibold mb-4">Avg Memory Usage (MB)</h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={memoryData} layout="vertical">
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid #e5e7eb",
+                }}
+              />
+
+              <Bar dataKey="memory" fill="#F59E0B" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      <div className="border-t bg-white px-6 py-4 flex justify-end gap-3">
+        <button
+          onClick={exportPDF}
+          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Download PDF
+        </button>
       </div>
     </div>
   );

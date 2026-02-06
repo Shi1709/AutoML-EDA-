@@ -1,134 +1,117 @@
-import { useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
+import { Trophy, Loader2 } from "lucide-react";
 
-const models = [
-  {
-    rank: 1,
-    name: "Gradient Boosting Regressor",
-    time: "2.6s",
-    r2: "0.887",
-    mse: "0.0529",
-    mae: "0.1592",
-    recommended: true,
-  },
-  {
-    rank: 2,
-    name: "Neural Network Regressor",
-    time: "3.6s",
-    r2: "0.843",
-    mse: "0.0371",
-    mae: "0.0430",
-  },
-  {
-    rank: 3,
-    name: "Support Vector Regressor",
-    time: "4.9s",
-    r2: "0.832",
-    mse: "0.0975",
-    mae: "0.2272",
-  },
-  {
-    rank: 4,
-    name: "Ridge Regression",
-    time: "2.9s",
-    r2: "0.781",
-    mse: "0.1811",
-    mae: "0.1082",
-  },
-  {
-    rank: 5,
-    name: "Random Forest Regressor",
-    time: "4.3s",
-    r2: "0.726",
-    mse: "0.2262",
-    mae: "0.1042",
-  },
-  {
-    rank: 6,
-    name: "Linear Regression",
-    time: "3.6s",
-    r2: "0.706",
-    mse: "0.0499",
-    mae: "0.2958",
-  },
-];
+const BestModel = ({ pipelineId, goToStep }) => {
+  const [models, setModels] = useState([]);
+  const [bestModel, setBestModel] = useState(null); // string
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-const BestModel = () => {
-  const [selectedRank, setSelectedRank] = useState(null);
+  useEffect(() => {
+    if (!pipelineId) return;
+
+    fetch(`http://127.0.0.1:8000/pipeline/compare?pipeline_id=${pipelineId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setModels(data.ranking);      // ✅ correct
+        setBestModel(data.best_model); // ✅ string
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [pipelineId]);
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (!bestModel || models.length === 0) return null;
+
+  const best = models.find((m) => m.model === bestModel);
+
+  const confirmBestModel = async () => {
+    if (selectedIndex === null) return;
+
+    const modelName = models[selectedIndex].model;
+    setSubmitting(true);
+
+    try {
+      await fetch(
+        `http://127.0.0.1:8000/pipeline/best-model?pipeline_id=${pipelineId}&model_name=${encodeURIComponent(
+          modelName
+        )}`,
+        { method: "POST" }
+      );
+      goToStep(11);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="border-b px-6 py-4">
         <h2 className="text-md font-semibold">Best Model</h2>
       </div>
-      <div className="flex-1 p-6 space-y-6">
-        <div>
-          <h3 className="text-xl font-semibold">Select Best Model</h3>
-          <p className="text-sm text-gray-500">
-            Choose the model to use for final predictions
-          </p>
-        </div>
-        <div className="space-y-4">
-          {models.map((model) => {
-            const isSelected = selectedRank === model.rank;
 
-            return (
-              <div
-                key={model.rank}
-                onClick={() => setSelectedRank(model.rank)}
-                className={`cursor-pointer rounded-xl border p-5 transition ${
-                  isSelected
-                    ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`h-10 w-10 rounded-lg flex items-center justify-center text-sm font-semibold ${
-                        isSelected
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {isSelected ? "✓" : `#${model.rank}`}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold">{model.name}</p>
-                        {model.recommended && (
-                          <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600">
-                            ☆ Recommended
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        Training time: {model.time}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-semibold">
-                      {model.r2}
-                    </p>
-                    <p className="text-xs text-gray-500">R² Score</p>
-                  </div>
-                </div>
-                <div className="my-4 border-t" />
-                <div className="flex gap-6 text-sm text-gray-600">
-                  <span>MSE: {model.mse}</span>
-                  <span>MAE: {model.mae}</span>
-                </div>
-              </div>
-            );
-          })}
+      <div className="flex-1 p-6 space-y-6">
+        {/* Recommended */}
+        <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-md bg-blue-100 flex items-center justify-center">
+              <Trophy className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Recommended</p>
+              <p className="font-semibold">{bestModel}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-bold text-blue-600">
+              {best?.avg_score?.toFixed(3)}
+            </p>
+            <p className="text-xs text-gray-500">Avg Score</p>
+          </div>
         </div>
+
+        {/* Model list */}
+        <div className="space-y-3">
+          {models.map((m, idx) => (
+            <div
+              key={m.model}
+              onClick={() => setSelectedIndex(idx)}
+              className={`cursor-pointer rounded-lg border px-5 py-4 ${
+                selectedIndex === idx
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <p className="font-medium">{m.model}</p>
+                <p className="font-semibold text-blue-600">
+                  {m.avg_score.toFixed(4)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="flex justify-end pt-4">
           <button
-            disabled={!selectedRank}
-            className={`cursor-pointer px-6 py-2 rounded-lg text-white ${
-              selectedRank
+            disabled={selectedIndex === null || submitting}
+            onClick={confirmBestModel}
+            className={`px-6 py-2 rounded-lg text-white ${
+              selectedIndex !== null
                 ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-300 cursor-not-allowed"
+                : "bg-gray-300"
             }`}
           >
             Continue to Evaluation
