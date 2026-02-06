@@ -13,8 +13,8 @@ const Comparison = ({ pipelineId, goToStep }) => {
     fetch(`http://127.0.0.1:8000/pipeline/compare?pipeline_id=${pipelineId}`)
       .then((res) => res.json())
       .then((data) => {
-        setBestModel(data.best_model);   // string
-        setModels(data.ranking);        // array
+        setBestModel(data.best_model);   
+        setModels(data.ranking);        
         setLoading(false);
       })
       .catch((err) => {
@@ -40,7 +40,6 @@ const Comparison = ({ pipelineId, goToStep }) => {
       <div className="border-b border-gray-300 px-6 py-4">
         <h2 className="text-md font-semibold">Comparison</h2>
       </div>
-
       <div className="flex-1 p-6 space-y-6">
         <div>
           <h3 className="text-xl font-semibold mb-1">Model Comparison</h3>
@@ -48,8 +47,6 @@ const Comparison = ({ pipelineId, goToStep }) => {
             Averaged over 3 runs per model
           </p>
         </div>
-
-        {/* Best Model */}
         <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-100">
@@ -68,8 +65,6 @@ const Comparison = ({ pipelineId, goToStep }) => {
             <p className="text-sm text-gray-500">Avg Score</p>
           </div>
         </div>
-
-        {/* Table */}
         <div className="overflow-hidden rounded-lg border border-gray-300">
           <table className="w-full border-collapse">
             <thead>

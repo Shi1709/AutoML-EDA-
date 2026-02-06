@@ -20,7 +20,7 @@ const Encoding = ({ pipelineId, goToStep }) => {
       const data = await res.json();
       setResult(data);
 
-      goToStep(5); // Target Selection
+      goToStep(5);
     } catch (err) {
       console.error(err);
       alert("Encoding failed");
@@ -41,7 +41,6 @@ const Encoding = ({ pipelineId, goToStep }) => {
           </p>
         </div>
 
-        {/* UI untouched */}
         <div className="rounded-lg border border-gray-200 bg-white px-5 py-4">
           <p className="text-sm font-semibold text-gray-900 mb-3">
             Categorical Columns Detected
@@ -56,7 +55,6 @@ const Encoding = ({ pipelineId, goToStep }) => {
           </div>
         </div>
 
-        {/* Strategy selection — logic wired */}
         <div className="rounded-lg border border-gray-200 bg-white px-5 py-4 space-y-5">
           <p className="text-sm font-semibold text-gray-900">
             Select Encoding Strategy
@@ -81,23 +79,6 @@ const Encoding = ({ pipelineId, goToStep }) => {
               <div className="rounded bg-gray-100 px-3 py-2 text-sm font-mono text-gray-700">
                 Example: [&quot;Pave&quot;, &quot;Grvl&quot;] → [0, 1]
               </div>
-            </div>
-          </label>
-
-          <label className="flex items-start gap-3 rounded-lg border border-gray-200 px-4 py-4 cursor-pointer hover:bg-gray-50">
-            <input
-              type="radio"
-              name="encoding"
-              disabled
-              className="mt-1 h-4 w-4 accent-blue-600"
-            />
-            <div className="space-y-2 opacity-50">
-              <p className="text-sm font-medium text-gray-900">
-                One-Hot Encoding (Coming Soon)
-              </p>
-              <p className="text-sm font-semibold text-gray-600">
-                Create binary columns for each category.
-              </p>
             </div>
           </label>
         </div>

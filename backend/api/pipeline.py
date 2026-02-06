@@ -9,7 +9,7 @@ from typing import List
 
 from services.ingestion import load_dataset
 from services.cleaning import handle_nulls
-from core.pipeline_state import create_pipeline, get_pipeline
+from core.pipeline_state import create_pipeline, get_pipeline, log_activity
 from services.correlation import compute_correlation, drop_columns
 from services.encoding import label_encode
 from services.target import select_target
@@ -42,6 +42,12 @@ def upload_dataset(file: UploadFile = File(...)):
 
     df = result["df"]
     create_pipeline(pipeline_id, df)
+    pipeline = get_pipeline(pipeline_id)
+    log_activity(
+        pipeline,
+        f"Uploaded dataset {file.filename}",
+        "upload"
+    )
 
     return {
         "pipeline_id": pipeline_id,
@@ -58,6 +64,11 @@ def clean_data(pipeline_id: str, strategy: str):
     result = handle_nulls(pipeline["df"], strategy)
     pipeline["df"] = result["df"]
     pipeline["step"] = 2
+    log_activity(
+        pipeline,
+        f"Applied data cleaning ({strategy})",
+        "cleaning"
+    )
 
     return {
         "meta": result["meta"],
@@ -77,6 +88,12 @@ def drop_corr_columns(pipeline_id: str, payload: DropColumnsRequest):
     pipeline = get_pipeline(pipeline_id)
     pipeline["df"] = pipeline["df"].drop(columns=payload.columns)
     pipeline["step"] = 3
+    log_activity(
+        pipeline,
+        f"Removed correlated columns: {', '.join(payload.columns)}",
+        "correlation"
+    )
+
     return {"meta": {"removed": payload.columns}}
 
 @router.post("/encode")
@@ -90,6 +107,11 @@ def encode_data(pipeline_id: str, strategy: str = "label"):
 
     pipeline["df"] = result["df"]
     pipeline["step"] = 4
+    log_activity(
+        pipeline,
+        "Encoded categorical features (label encoding)",
+        "encoding"
+    )
 
     return {
         "meta": result["meta"],
@@ -107,6 +129,11 @@ def set_target(pipeline_id: str, target_column: str):
     pipeline["target"] = result["meta"]["target_column"]
     pipeline["task_type"] = result["meta"]["task_type"]
     pipeline["step"] = 5
+    log_activity(
+        pipeline,
+        f"Selected target column '{target_column}'",
+        "target"
+    )
 
     return {
         "meta": result["meta"]
@@ -148,6 +175,12 @@ def split_data(pipeline_id: str, train_percent: int):
 
     pipeline["splits"] = result["splits"]
     pipeline["step"] = 6
+    log_activity(
+        pipeline,
+        f"Split dataset ({train_percent}% train)",
+        "split"
+    )
+
 
     return {
         "meta": result["meta"]
@@ -173,6 +206,12 @@ def train(pipeline_id: str):
     pipeline["models"] = result["models"]
     pipeline["metrics"] = result["metrics"]
     pipeline["step"] = 7
+    log_activity(
+        pipeline,
+        f"Trained {len(result['metrics'])} models (3 runs each)",
+        "training"
+    )
+
 
     return {
         "meta": {
@@ -195,6 +234,11 @@ def compare(pipeline_id: str):
 
     pipeline["best_model"] = result["best_model"]
     pipeline["step"] = 8
+    log_activity(
+        pipeline,
+        f"Compared models, best: {result['best_model']}",
+        "comparison"
+    )
 
     return result
 
@@ -226,6 +270,12 @@ def apply_pca_step(
     pipeline["X"] = result["X_pca"]
     pipeline["pca"] = result["meta"]
     pipeline["step"] = 9
+    log_activity(
+        pipeline,
+        f"PCA {'enabled' if enabled else 'skipped'} (variance={variance}%)",
+        "pca"
+    )
+
 
     return {
         "meta": {
@@ -243,6 +293,11 @@ def choose_best_model(pipeline_id: str, model_name: str):
 
     pipeline["best_model"] = model_name
     pipeline["step"] = 9
+    log_activity(
+        pipeline,
+        f"Selected best model: {model_name}",
+        "selection"
+    )
 
     return {
         "meta": {
@@ -275,6 +330,11 @@ def evaluate(pipeline_id: str):
 
     pipeline["evaluation"] = metrics
     pipeline["step"] = 10
+    log_activity(
+        pipeline,
+        f"Evaluated model {model_name}",
+        "evaluation"
+    )
 
     return {
         "model": model_name,
@@ -287,6 +347,11 @@ def visualization(pipeline_id: str):
     pipeline = get_pipeline(pipeline_id)
 
     metrics = pipeline["metrics"]
+    log_activity(
+        pipeline,
+        "Viewed model performance visualization",
+        "visualization"
+    )
 
     return {
         "model_scores": [
@@ -323,6 +388,11 @@ def export_model(pipeline_id: str):
     path = f"storage/{pipeline_id}_model.pkl"
     with open(path, "wb") as f:
         pickle.dump(model, f)
+    log_activity(
+        pipeline,
+        "Downloaded trained model (.pkl)",
+        "export"
+    )
 
     return FileResponse(path, filename="best_model.pkl")
 
@@ -344,3 +414,7 @@ def export_predictions(pipeline_id: str):
 
     return FileResponse(path, filename="predictions.csv")
 
+@router.get("/activity")
+def get_activity(pipeline_id: str):
+    pipeline = get_pipeline(pipeline_id)
+    return {"events": pipeline.get("activity", [])}

@@ -23,8 +23,7 @@ const Split = ({ pipelineId, goToStep }) => {
 
       const data = await res.json();
       setMeta(data.meta);
-
-      goToStep(7); // Model Training
+      goToStep(7); 
     } catch (err) {
       console.error(err);
       alert("Split failed");
@@ -73,8 +72,6 @@ const Split = ({ pipelineId, goToStep }) => {
             <span>90%</span>
           </div>
         </div>
-
-        {/* REAL DATA FROM BACKEND */}
         {meta && (
           <div className="rounded-lg border border-gray-200 bg-white px-5 py-4 space-y-4">
             <p className="text-sm font-semibold">Dataset Distribution</p>

@@ -33,7 +33,7 @@ const Dashboard = () => {
         setUploadData={setUploadData}
       />
 
-      <ActivityLog />
+      <ActivityLog pipelineId={pipelineId}/>
     </div>
   );
 };

@@ -43,7 +43,7 @@ def train_models(X_train, X_test, y_train, y_test, task_type, runs=3):
             "avg_memory_mb": round(float(np.mean(memories)), 2),
         }
 
-        final_models[name] = model  # keep last trained model
+        final_models[name] = model  
 
     return {
         "models": final_models,
