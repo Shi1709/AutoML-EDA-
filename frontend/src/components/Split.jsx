@@ -1,29 +1,55 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { SquareSplitVertical } from "lucide-react";
 
-const TOTAL_SAMPLES = 1460;
-
-const Split = () => {
+const Split = ({ pipelineId, goToStep }) => {
   const [trainPercent, setTrainPercent] = useState(80);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const trainCount = Math.round((trainPercent / 100) * TOTAL_SAMPLES);
-  const testCount = TOTAL_SAMPLES - trainCount;
+  const handleSplit = async () => {
+    if (!pipelineId) {
+      alert("Pipeline not found");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:8000/pipeline/split?pipeline_id=${pipelineId}&train_percent=${trainPercent}`,
+        { method: "POST" }
+      );
+
+      const data = await res.json();
+      setMeta(data.meta);
+
+      goToStep(7); // Model Training
+    } catch (err) {
+      console.error(err);
+      alert("Split failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
       <div className="border-b border-gray-300 px-6 py-4">
         <h2 className="text-md font-semibold">Split</h2>
       </div>
+
       <div className="flex-1 p-6 space-y-6">
         <div>
           <h3 className="text-xl font-semibold mb-1">Train/Test Split</h3>
           <p className="text-sm text-gray-500">
-            Split the dataset into training and testing sets for model evaluation
+            Split the dataset into training and testing sets
           </p>
         </div>
+
         <div className="rounded-lg border border-gray-200 bg-white px-5 py-4 space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+            <div className="flex items-center gap-2 text-sm font-medium">
               <SquareSplitVertical className="h-4 w-4 text-blue-600" />
               Training Set Size
             </div>
@@ -31,6 +57,7 @@ const Split = () => {
               {trainPercent}%
             </span>
           </div>
+
           <input
             type="range"
             min="60"
@@ -40,56 +67,57 @@ const Split = () => {
             onChange={(e) => setTrainPercent(Number(e.target.value))}
             className="w-full accent-blue-600"
           />
+
           <div className="flex justify-between text-sm text-gray-500">
             <span>60%</span>
             <span>90%</span>
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white px-5 py-4 space-y-4">
-          <p className="text-sm font-semibold text-gray-900">
-            Dataset Distribution
-          </p>
-          <div className="flex h-10 w-full overflow-hidden rounded-md bg-gray-100 text-sm font-medium">
-            <div
-              className="flex items-center justify-center bg-blue-600 text-white transition-all"
-              style={{ width: `${trainPercent}%` }}
-            >
-              Training
+
+        {/* REAL DATA FROM BACKEND */}
+        {meta && (
+          <div className="rounded-lg border border-gray-200 bg-white px-5 py-4 space-y-4">
+            <p className="text-sm font-semibold">Dataset Distribution</p>
+
+            <div className="flex h-10 w-full overflow-hidden rounded-md bg-gray-100 text-sm font-medium">
+              <div
+                className="flex items-center justify-center bg-blue-600 text-white"
+                style={{ width: `${trainPercent}%` }}
+              >
+                Training
+              </div>
+              <div
+                className="flex items-center justify-center bg-gray-100 text-gray-700"
+                style={{ width: `${100 - trainPercent}%` }}
+              >
+                Testing
+              </div>
             </div>
-            <div
-              className="flex items-center justify-center bg-gray-100 text-gray-700 transition-all"
-              style={{ width: `${100 - trainPercent}%` }}
-            >
-              Testing
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg bg-blue-50 px-4 py-4">
+                <p className="text-sm text-gray-600">Training Samples</p>
+                <p className="text-xl font-semibold text-blue-600">
+                  {meta.train_size}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-gray-50 px-4 py-4">
+                <p className="text-sm text-gray-600">Testing Samples</p>
+                <p className="text-xl font-semibold text-gray-900">
+                  {meta.test_size}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg bg-blue-50 px-4 py-4">
-              <p className="text-sm text-gray-600">Training Samples</p>
-              <p className="text-xl font-semibold text-blue-600">
-                {trainCount.toLocaleString()}
-              </p>
-            </div>
-            <div className="rounded-lg bg-gray-50 px-4 py-4">
-              <p className="text-sm text-gray-600">Testing Samples</p>
-              <p className="text-xl font-semibold text-gray-900">
-                {testCount.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-4">
-          <p className="text-sm font-semibold text-gray-900 mb-2">
-            Recommendations
-          </p>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
-            <li>80/20 split is commonly used for most datasets</li>
-            <li>Use larger training sets for small datasets</li>
-            <li>Consider cross-validation for more robust evaluation</li>
-          </ul>
-        </div>
+        )}
+
         <div className="flex justify-end">
-          <button className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          <button
+            onClick={handleSplit}
+            disabled={loading}
+            className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+          >
             Continue to Model Training
           </button>
         </div>

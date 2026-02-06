@@ -29,23 +29,23 @@ const Workspace = ({ activeStep, goToStep, pipelineId, setPipelineId, uploadData
       case 3:
         return <Correlation goToStep={goToStep} pipelineId={pipelineId} />;
       case 4:
-        return <Encoding />;
+        return <Encoding goToStep={goToStep} pipelineId={pipelineId}/>;
       case 5:
-        return <TargetSelection />;
+        return <TargetSelection goToStep={goToStep} pipelineId={pipelineId}/>;
       case 6:
-        return <Split />;
+        return <Split goToStep={goToStep} pipelineId={pipelineId}/>;
       case 7:
-        return <ModelTraining />;
+        return <ModelTraining goToStep={goToStep} pipelineId={pipelineId}/>;
       case 8:
-        return <Comparison />;
+        return <Comparison goToStep={goToStep} pipelineId={pipelineId}/>;
       case 9:
-        return <PCA />;
+        return <PCA goToStep={goToStep} pipelineId={pipelineId}/>;
       case 10:
-        return <BestModel />;
+        return <BestModel goToStep={goToStep} pipelineId={pipelineId}/>;
       case 11:
-        return <Evaluation />;
+        return <Evaluation goToStep={goToStep} pipelineId={pipelineId}/>;
       case 12:
-        return <Visualization />;
+        return <Visualization goToStep={goToStep} pipelineId={pipelineId}/>;
       default:
         return null;
     }

@@ -1,74 +1,83 @@
-const Evaluation = () => {
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
+
+const MetricCard = ({ title, value, color = "blue" }) => (
+  <div className="border border-gray-300 rounded-xl p-5">
+    <p className="text-sm text-gray-500">{title}</p>
+    <p className={`text-3xl font-semibold text-${color}-600`}>
+      {value ?? "—"}
+    </p>
+  </div>
+);
+
+const Evaluation = ({ pipelineId, goToStep }) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!pipelineId) return;
+
+    setLoading(true);
+
+    fetch(`http://127.0.0.1:8000/pipeline/evaluate?pipeline_id=${pipelineId}`)
+      .then((res) => res.json())
+      .then((res) => {
+        setData(res);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [pipelineId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        Evaluating model...
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { model, task_type, metrics } = data;
+
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="border-b border-gray-300 px-6 py-4">
         <h2 className="text-md font-semibold">Evaluation</h2>
       </div>
+
       <div className="flex-1 p-6 space-y-6">
         <div>
           <h3 className="text-xl font-semibold">Model Evaluation</h3>
           <p className="text-sm text-gray-500">
-            Detailed performance metrics for Gradient Boosting Regressor
+            Detailed performance metrics for <b>{model}</b>
           </p>
         </div>
-        <div className="border border-gray-300 rounded-xl p-5 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-            ✓
+
+        {/* REGRESSION */}
+        {task_type === "REGRESSION" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <MetricCard title="R² Score" value={metrics.r2} />
+            <MetricCard title="MSE" value={metrics.mse} color="green" />
+            <MetricCard title="MAE" value={metrics.mae} />
           </div>
-          <div>
-            <p className="font-semibold">Gradient Boosting Regressor</p>
-            <p className="text-sm text-gray-500">
-              Regression Model · Trained in 2.6s
-            </p>
+        )}
+
+        {/* CLASSIFICATION */}
+        {task_type === "CLASSIFICATION" && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <MetricCard title="Accuracy" value={metrics.accuracy} />
+            <MetricCard title="Precision" value={metrics.precision} />
+            <MetricCard title="Recall" value={metrics.recall} />
+            <MetricCard title="F1 Score" value={metrics.f1} />
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="border border-gray-300 rounded-xl p-5 space-y-3">
-            <p className="text-sm text-gray-500 flex items-center gap-2">
-              ↗ R² Score
-            </p>
-            <p className="text-3xl font-semibold text-blue-600">0.887</p>
-            <p className="text-sm text-gray-500">
-              Proportion of variance explained
-            </p>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full w-[89%] bg-blue-600 rounded-full" />
-            </div>
-          </div>
-          <div className="border border-gray-300 rounded-xl p-5 space-y-3">
-            <p className="text-sm text-gray-500 flex items-center gap-2">
-              ◎ MSE
-            </p>
-            <p className="text-3xl font-semibold text-green-500">0.0529</p>
-            <p className="text-sm text-gray-500">
-              Mean Squared Error
-            </p>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full w-[92%] bg-green-500 rounded-full" />
-            </div>
-          </div>
-          <div className="border border-gray-300 rounded-xl p-5 space-y-3">
-            <p className="text-sm text-gray-500 flex items-center gap-2">
-              ⚖ MAE
-            </p>
-            <p className="text-3xl font-semibold text-blue-600">0.1592</p>
-            <p className="text-sm text-gray-500">
-              Mean Absolute Error
-            </p>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full w-[85%] bg-blue-600 rounded-full" />
-            </div>
-          </div>
-        </div>
-        <div className="border border-gray-300 rounded-xl p-5">
-          <p className="font-semibold mb-1">Performance Summary</p>
-          <p className="text-sm text-gray-600">
-            Excellent fit. The model explains a high proportion of variance in
-            the target variable.
-          </p>
-        </div>
+        )}
+
         <div className="flex justify-end pt-4">
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 cursor-pointer">
+          <button
+            onClick={() => goToStep(12)}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
             Continue to Visualization
           </button>
         </div>
